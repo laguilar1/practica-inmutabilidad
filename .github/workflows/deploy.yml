@@ -28,5 +28,5 @@ jobs:
         push: true
         # Aquí está el truco: usamos el hash del commit para que sea única e inmutable
         tags: |
-          ${{ secrets.DOCKER_USERNAME }}/mi-app:${{ github.sha }}
-          ${{ secrets.DOCKER_USERNAME }}/mi-app:latest
+          ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:${{ github.sha }}
+          ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:latest
