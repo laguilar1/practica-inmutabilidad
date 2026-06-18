@@ -13,20 +13,28 @@ jobs:
     - name: Checkout del código
       uses: actions/checkout@v4
 
-    # 2. Autenticarse en Docker Hub usando los secretos
+    # 2. Leer versión del package.json
+    - name: Leer versión del package.json
+      id: package_version
+      run: |
+        VERSION=$(jq -r .version package.json)
+        echo "version=v$VERSION" >> $GITHUB_OUTPUT
+
+    # 3. Autenticarse en Docker Hub usando los secretos
     - name: Autenticación en Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # 3. Construir y subir la imagen con la etiqueta inmutable (SHA del commit)
+    # 4. Construir y subir la imagen con la etiqueta inmutable (versión semántica y SHA del commit)
     - name: Construir y Subir Imagen Docker
       uses: docker/build-push-action@v5
       with:
         context: .
         push: true
-        # Aquí está el truco: usamos el hash del commit para que sea única e inmutable
+        # Usamos tanto la versión semántica como el hash del commit para mayor flexibilidad
         tags: |
+          ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:${{ steps.package_version.outputs.version }}
           ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:${{ github.sha }}
           ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:latest
