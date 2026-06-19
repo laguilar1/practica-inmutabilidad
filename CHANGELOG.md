@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/laguilar1/practica-inmutabilidad/compare/v1.0.0...v1.0.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* corrigiendo texto de bienvenida ([8f1c849](https://github.com/laguilar1/practica-inmutabilidad/commit/8f1c849aeb26a4825d3aa8e74791a429a8889461))
+
 ## 1.0.0 (2026-06-19)
 
 
