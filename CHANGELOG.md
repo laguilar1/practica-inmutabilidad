@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/laguilar1/practica-inmutabilidad/compare/v1.0.1...v1.1.0) (2026-06-19)
+
+
+### Features
+
+* cambiar a MINOR ([8bbd208](https://github.com/laguilar1/practica-inmutabilidad/commit/8bbd208cd07a14ce57fbe77691f7b690d43e55eb))
+
 ## [1.0.1](https://github.com/laguilar1/practica-inmutabilidad/compare/v1.0.0...v1.0.1) (2026-06-19)
 
 
