@@ -4,37 +4,42 @@ on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  build-and-push:
+  release-or-deploy:
     runs-on: ubuntu-latest
-
     steps:
-    # 1. Descargar el código del commit actual
-    - name: Checkout del código
-      uses: actions/checkout@v4
+      # 1. Ejecutar Release Please para automatizar versiones y PRs
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: node
 
-    # 2. Leer versión del package.json
-    - name: Leer versión del package.json
-      id: package_version
-      run: |
-        VERSION=$(jq -r .version package.json)
-        echo "version=v$VERSION" >> $GITHUB_OUTPUT
+      # 2. Descargar el código (solo si se creó una nueva release)
+      - name: Checkout del código
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v4
 
-    # 3. Autenticarse en Docker Hub usando los secretos
-    - name: Autenticación en Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      # 3. Autenticarse en Docker Hub (solo si se creó una nueva release)
+      - name: Autenticación en Docker Hub
+        if: ${{ steps.release.outputs.release_created }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # 4. Construir y subir la imagen con la etiqueta inmutable (versión semántica y SHA del commit)
-    - name: Construir y Subir Imagen Docker
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        # Usamos tanto la versión semántica como el hash del commit para mayor flexibilidad
-        tags: |
-          ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:${{ steps.package_version.outputs.version }}
-          ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:${{ github.sha }}
-          ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:latest
+      # 4. Construir y subir la imagen Docker usando la versión exacta generada por release-please
+      - name: Construir y Subir Imagen Docker
+        if: ${{ steps.release.outputs.release_created }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Usamos la versión semántica de release-please, el hash y latest
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:${{ steps.release.outputs.tag_name }}
+            ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/practica-inmutabilidad:latest
